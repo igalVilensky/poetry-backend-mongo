@@ -3,15 +3,15 @@ const Comment = require("../models/Comment");
 const router = express.Router();
 
 // Add a new comment
-router.post("/:postId", async (req, res) => {
-  const { postId } = req.params;
+router.post("/:slug", async (req, res) => {
+  const { slug } = req.params; // Use slug instead of postId
   const { author, avatar, content } = req.body;
 
   try {
     const newComment = new Comment({
-      postId,
-      author: author || "Anonymous", // Default to "Anonymous" if no author is provided
-      avatar: avatar || "/api/placeholder/40/40", // Default avatar
+      postId: slug, // Use slug as postId
+      author: author || "Anonymous",
+      avatar: avatar || "/api/placeholder/40/40",
       content,
     });
     await newComment.save();
@@ -22,11 +22,11 @@ router.post("/:postId", async (req, res) => {
 });
 
 // Get all comments for a post
-router.get("/:postId", async (req, res) => {
-  const { postId } = req.params;
+router.get("/:slug", async (req, res) => {
+  const { slug } = req.params; // Use slug instead of postId
 
   try {
-    const comments = await Comment.find({ postId }).sort({ date: -1 });
+    const comments = await Comment.find({ postId: slug }).sort({ date: -1 }); // Find by slug
     res.json(comments);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch comments", error });
@@ -34,7 +34,7 @@ router.get("/:postId", async (req, res) => {
 });
 
 // Like a comment
-router.post("/:postId/:commentId/like", async (req, res) => {
+router.post("/:slug/:commentId/like", async (req, res) => {
   const { commentId } = req.params;
 
   try {

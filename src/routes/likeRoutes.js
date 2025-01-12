@@ -3,26 +3,26 @@ const Like = require("../models/Like");
 const router = express.Router();
 
 // Toggle like for a post
-router.post("/:postId/toggle", async (req, res) => {
-  const { postId } = req.params;
-  const { sessionId } = req.body; // Pass sessionId or IP from the frontend
+router.post("/:slug/toggle", async (req, res) => {
+  const { slug } = req.params; // Use slug instead of postId
+  const { sessionId } = req.body;
 
   try {
-    // Check if a like already exists for this post and session
-    const existingLike = await Like.findOne({ postId, sessionId });
+    const existingLike = await Like.findOne({ postId: slug, sessionId }); // Find by slug
 
     if (existingLike) {
-      // If liked, remove the like
-      await Like.deleteOne({ postId, sessionId });
+      await Like.deleteOne({ postId: slug, sessionId });
       res.json({
         isLiked: false,
-        count: await Like.countDocuments({ postId }),
+        count: await Like.countDocuments({ postId: slug }),
       });
     } else {
-      // If not liked, add the like
-      const newLike = new Like({ postId, sessionId });
+      const newLike = new Like({ postId: slug, sessionId });
       await newLike.save();
-      res.json({ isLiked: true, count: await Like.countDocuments({ postId }) });
+      res.json({
+        isLiked: true,
+        count: await Like.countDocuments({ postId: slug }),
+      });
     }
   } catch (error) {
     res.status(500).json({ message: "Failed to toggle like", error });
@@ -30,13 +30,13 @@ router.post("/:postId/toggle", async (req, res) => {
 });
 
 // Get like count and status for a post
-router.get("/:postId", async (req, res) => {
-  const { postId } = req.params;
-  const { sessionId } = req.query; // Pass sessionId or IP from the frontend
+router.get("/:slug", async (req, res) => {
+  const { slug } = req.params; // Use slug instead of postId
+  const { sessionId } = req.query;
 
   try {
-    const count = await Like.countDocuments({ postId });
-    const isLiked = await Like.exists({ postId, sessionId });
+    const count = await Like.countDocuments({ postId: slug }); // Find by slug
+    const isLiked = await Like.exists({ postId: slug, sessionId });
     res.json({ isLiked: !!isLiked, count });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch likes", error });
