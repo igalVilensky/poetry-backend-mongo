@@ -4,7 +4,7 @@ const router = express.Router();
 
 // Audio Streaming Route
 router.get("/stream-audio", async (req, res) => {
-  const { trackId } = req.query; // Get the trackId from the query parameters
+  const { trackId, download } = req.query; // Get the trackId and download flag from the query parameters
 
   // Validate trackId
   if (!trackId) {
@@ -22,6 +22,11 @@ router.get("/stream-audio", async (req, res) => {
 
     // Set the correct Content-Type header
     res.set("Content-Type", "audio/mpeg");
+
+    // If the download flag is set, force the browser to download the file
+    if (download === "true") {
+      res.set("Content-Disposition", `attachment; filename="${trackId}.mp3"`);
+    }
 
     // Stream the file to the client
     response.data.pipe(res);
